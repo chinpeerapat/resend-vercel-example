@@ -1,5 +1,4 @@
 "use client";
-
 import clsx from "clsx";
 import { useFormState, useFormStatus } from "react-dom";
 import { send } from "./lib/actions";
@@ -10,78 +9,67 @@ export default function Page() {
   const [state, dispatch] = useFormState(send, undefined);
 
   React.useEffect(() => {
-    if (!state) {
-      return;
-    }
-
+    if (!state) return;
     if ("data" in state) {
-      toast(state.data);
+      toast.success(state.data);
     } else if ("error" in state) {
-      toast(`Error when sending email: ${state.error}`);
+      toast.error(`Error when sending email: ${state.error}`);
     }
   }, [state]);
 
   return (
-    <div className="bg-zinc-950 p-8 min-h-screen flex justify-center items-center sm:items-start sm:p-24">
-      <div className="mx-auto w-full max-w-5xl sm:px-6 lg:px-8">
-        <div className="relative isolate overflow-hidden bg-gray-900 px-6 py-24 shadow-2xl rounded-lg sm:rounded-3xl sm:px-24 xl:py-32 flex items-center flex-col">
-          <h2 className="max-w-2xl text-center text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            Get invited to a team
-          </h2>
+    <div className="min-h-screen bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-950 p-6 sm:p-10 flex justify-center items-center">
+      <div className="w-full max-w-4xl mx-auto">
+        <div className="relative backdrop-blur-xl bg-white/10 p-10 sm:p-14 rounded-2xl border border-white/15 shadow-2xl">
+          {/* Decorative elements */}
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/15 to-pink-500/15 rounded-2xl filter blur-3xl -z-10" />
+          <div className="absolute -top-14 -right-14 w-48 h-48 bg-purple-500/25 rounded-full filter blur-3xl" />
+          <div className="absolute -bottom-14 -left-14 w-48 h-48 bg-pink-500/25 rounded-full filter blur-3xl" />
 
-          <p className="mt-2 max-w-xl text-center text-lg leading-8 text-gray-300">
-            Type your email address to get invited to a team.
-          </p>
+          <div className="space-y-10">
+            <div className="space-y-6">
+              <h2 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-200 text-center">
+                Good Things Come to Those Who Wait
+              </h2>
+              <p className="text-gray-300 text-center text-lg sm:text-xl max-w-2xl mx-auto">
+                Join us to access exclusive updates, stay in the know, and be
+                the first to experience what’s coming.
+              </p>
+            </div>
 
-          <form
-            className="mt-10 flex max-w-md gap-4 items-start w-full"
-            action={dispatch}
-          >
-            <label htmlFor="email" className="sr-only">
-              Email address
-            </label>
+            <form
+              className="mt-12 flex flex-col sm:flex-row gap-5 max-w-md mx-auto w-full"
+              action={dispatch}
+            >
+              <div className="relative flex-1">
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  placeholder="your@email.com"
+                  autoComplete="email"
+                  aria-label="Email Address"
+                  className="w-full h-14 rounded-xl bg-white/10 px-5 text-white placeholder-gray-500 
+                    border border-white/15 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/30 
+                    transition-all duration-200 outline-none"
+                />
+              </div>
+              <SubmitButton />
+            </form>
 
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              defaultValue="delivered@resend.dev"
-              placeholder="jane@example.com"
-              autoComplete="email"
-              className="w-full rounded-md border-0 bg-white/5 px-3.5 py-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-white sm:text-sm sm:leading-6"
-            />
-
-            <SubmitButton />
-          </form>
-
-          <svg
-            viewBox="0 0 1024 1024"
-            aria-hidden="true"
-            className="absolute left-1/2 top-1/2 -z-10 h-[64rem] w-[64rem] -translate-x-1/2"
-          >
-            <circle
-              r={512}
-              cx={512}
-              cy={512}
-              fill="url(#759c1415-0410-454c-8f7c-9a820de03641)"
-              fillOpacity="0.7"
-            />
-
-            <defs>
-              <radialGradient
-                r={1}
-                cx={0}
-                cy={0}
-                id="759c1415-0410-454c-8f7c-9a820de03641"
-                gradientUnits="userSpaceOnUse"
-                gradientTransform="translate(512 512) rotate(90) scale(512)"
-              >
-                <stop stopColor="#7775D6" />
-                <stop offset={1} stopColor="#E935C1" stopOpacity={0} />
-              </radialGradient>
-            </defs>
-          </svg>
+            <div className="text-center text-sm text-gray-500 mt-8">
+              By joining, you agree to our{" "}
+              <a href="#" className="text-purple-400 underline">
+                Terms of Service
+              </a>{" "}
+              and{" "}
+              <a href="#" className="text-purple-400 underline">
+                Privacy Policy
+              </a>
+              .
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -90,16 +78,19 @@ export default function Page() {
 
 function SubmitButton() {
   const { pending } = useFormStatus();
-
   return (
     <button
       type="submit"
+      disabled={pending}
       className={clsx(
-        "flex-none rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white",
-        pending && "opacity-50 cursor-not-allowed"
+        "h-14 px-10 rounded-xl font-semibold transition-all duration-200",
+        "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500",
+        "text-white shadow-lg shadow-purple-500/25",
+        "focus:ring-2 focus:ring-purple-500/30 outline-none",
+        pending && "opacity-60 cursor-not-allowed"
       )}
     >
-      Invite
+      {pending ? "Sending..." : "Join Waitlist"}
     </button>
   );
 }

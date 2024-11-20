@@ -1,27 +1,50 @@
 "use server";
 
 import { Resend } from "resend";
-import { VercelInviteUserEmail } from "../../emails/vercel-invite-user";
+import { WaitlistEmail } from "../../emails/waitlist-confirm";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 type State = { error: string } | { data: string };
 
-export async function send(prevState: State, formData: FormData) {
-  const email = formData.get("email") as string;
-
-  const { data, error } = await resend.emails.send({
-    from: "Vercel <vercel@resend.dev>",
-    to: [email],
-    subject: "Join team on Vercel",
-    react: VercelInviteUserEmail({}),
-  });
-
-  if (error) {
-    return { error: error.message };
+export async function send(
+  prevState: State,
+  formData: FormData
+): Promise<State> {
+  // Validate environment variables
+  if (!process.env.RESEND_API_KEY) {
+    throw new Error("RESEND_API_KEY is not defined in environment variables.");
+  }
+  if (!process.env.SENDER_NAME || !process.env.SENDER_EMAIL) {
+    throw new Error(
+      "SENDER_NAME or SENDER_EMAIL is not defined in environment variables."
+    );
   }
 
-  console.log(data);
+  // Extract and validate email
+  const email = formData.get("email") as string;
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { error: "Invalid email address." };
+  }
 
-  return { data: "Email sent!" };
+  try {
+    // Send email
+    const { data, error } = await resend.emails.send({
+      from: `${process.env.SENDER_NAME} <${process.env.SENDER_EMAIL}>`,
+      to: [email],
+      subject: "🎉 You’re on the List! Welcome to Waitlist 🚀",
+      react: WaitlistEmail({ email } as WaitlistEmailProps), // Pass email prop to the component
+    });
+
+    if (error) {
+      console.error("Failed to send email:", error);
+      return { error: `Failed to send email: ${error.message}` };
+    }
+
+    console.log("Email sent successfully:", data);
+    return { data: "Email sent!" };
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    return { error: "An unexpected error occurred while sending the email." };
+  }
 }
